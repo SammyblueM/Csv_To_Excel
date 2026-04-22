@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV 转 Excel 预览</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">CSV Text to Excel-like Table</p>
+        <h1>CSV 文本转 Excel 表格预览</h1>
+        <p class="hero-copy">
+          粘贴 CSV 内容后点击转换，右侧会生成可直接选中复制的表格。复制后可粘贴到 Word、Excel 或 WPS 表格中继续编辑。
+        </p>
+      </div>
+      <div class="hero-actions">
+        <button id="convertBtn" class="primary-btn">转换</button>
+        <button id="copyBtn" class="secondary-btn" disabled>复制整表</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>输入 CSV 文本</h2>
+          <button id="sampleBtn" class="text-btn">填充示例</button>
+        </div>
+        <label class="sr-only" for="csvInput">CSV 输入框</label>
+        <textarea
+          id="csvInput"
+          spellcheck="false"
+          placeholder="例如：&#10;姓名,部门,分数&#10;张三,销售,89&#10;李四,研发,95"
+        ></textarea>
+      </section>
+
+      <section class="panel output-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Excel 预览</h2>
+            <p id="metaText" class="meta-text">尚未转换</p>
+          </div>
+          <span class="hint">支持直接框选复制单元格内容</span>
+        </div>
+        <div id="tableWrapper" class="table-wrapper empty">
+          <div class="empty-state">
+            <p>转换后将在这里显示表格。</p>
+            <p>你可以直接拖拽选中表格内容，然后复制粘贴到 Word、Excel 或 WPS。</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <section class="tips">
+      <h2>使用说明</h2>
+      <ol>
+        <li>将 CSV 文本粘贴到左侧输入框。</li>
+        <li>点击“转换”生成表格预览。</li>
+        <li>直接选中右侧需要的区域复制，或点击“复制整表”。</li>
+        <li>在 Word、Excel 或 WPS 中粘贴即可。</li>
+      </ol>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
