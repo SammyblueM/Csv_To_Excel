@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV 转 Excel 预览</title>
+  <link rel="stylesheet" href="workspace.css">
+</head>
+<body>
+  <div class="app">
+    <header class="toolbar">
+      <div class="toolbar-title">
+        <span class="app-name">CSV / Excel Preview</span>
+        <span id="metaText" class="metaText">尚未转换</span>
+      </div>
+      <div class="actions">
+        <button id="sampleBtn" class="btn btn-ghost">示例</button>
+        <button id="convertBtn" class="btn btn-primary">转换</button>
+        <button id="copyBtn" class="btn btn-secondary" disabled>复制整表</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="panel input-panel">
+        <div class="panel-head">
+          <h2>CSV Input</h2>
+          <span class="panel-tag">Text</span>
+        </div>
+        <textarea
+          id="csvInput"
+          spellcheck="false"
+          placeholder="粘贴 CSV 文本，按 Ctrl+Enter 转换"
+        ></textarea>
+      </section>
+
+      <div id="splitter" class="splitter" title="拖动调整左右宽度"></div>
+
+      <section class="panel preview-panel">
+        <div class="panel-head preview-head">
+          <div>
+            <h2>Table Preview</h2>
+          </div>
+          <p class="hint">可直接框选复制</p>
+        </div>
+        <div id="tableWrapper" class="table-wrapper empty">
+          <div class="empty-state">
+            <p>等待 CSV 数据</p>
+            <p>转换后在这里预览和复制表格</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="workspace.js"></script>
+</body>
+</html>

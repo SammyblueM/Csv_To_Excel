@@ -4,6 +4,10 @@ const copyBtn = document.getElementById("copyBtn");
 const sampleBtn = document.getElementById("sampleBtn");
 const tableWrapper = document.getElementById("tableWrapper");
 const metaText = document.getElementById("metaText");
+const workspace = document.querySelector(".workspace");
+const splitter = document.getElementById("splitter");
+const INPUT_PANEL_WIDTH_KEY = "csv-preview-input-panel-width";
+const INPUT_PANEL_HEIGHT_KEY = "csv-preview-input-panel-height";
 
 let currentRows = [];
 
@@ -91,12 +95,43 @@ function buildTable(rows) {
         .join("")}
     </tbody>
   `;
-
   return `<table id="resultTable">${thead}${tbody}</table>`;
 }
 
 function toTabSeparated(rows) {
   return rows.map((row) => row.join("\t")).join("\n");
+}
+
+function setEmptyState(message, meta) {
+  currentRows = [];
+  tableWrapper.classList.add("empty");
+  tableWrapper.innerHTML = `
+    <div class="empty-state">
+      <p>${message}</p>
+    </div>
+  `;
+  metaText.textContent = meta;
+  copyBtn.disabled = true;
+}
+
+function renderTable() {
+  const source = csvInput.value.trim();
+  if (!source) {
+    setEmptyState("请输入 CSV 文本后再转换。", "请输入 CSV 内容");
+    return;
+  }
+
+  const parsedRows = parseCsv(source);
+  if (!parsedRows.length) {
+    setEmptyState("未识别到有效 CSV 数据，请检查逗号、换行或引号格式。", "转换失败");
+    return;
+  }
+
+  currentRows = normalizeRows(parsedRows);
+  tableWrapper.classList.remove("empty");
+  tableWrapper.innerHTML = buildTable(currentRows);
+  metaText.textContent = `共 ${currentRows.length} 行，${currentRows[0].length} 列`;
+  copyBtn.disabled = false;
 }
 
 async function copyTable() {
@@ -136,50 +171,21 @@ async function copyTable() {
   selection.addRange(range);
 
   const copied = document.execCommand("copy");
-
   selection.removeAllRanges();
   document.body.removeChild(ghost);
 
   if (!copied) {
-    throw new Error("当前浏览器不支持自动复制，请手动选中表格后复制。");
+    throw new Error("复制失败，请手动框选表格复制。");
   }
 }
 
-function renderTable() {
-  const source = csvInput.value.trim();
-  if (!source) {
-    currentRows = [];
-    tableWrapper.classList.add("empty");
-    tableWrapper.innerHTML = `
-      <div class="empty-state">
-        <p>请输入 CSV 文本后再转换。</p>
-      </div>
-    `;
-    metaText.textContent = "请输入 CSV 内容";
-    copyBtn.disabled = true;
-    return;
-  }
-
-  const parsedRows = parseCsv(source);
-  if (!parsedRows.length) {
-    currentRows = [];
-    tableWrapper.classList.add("empty");
-    tableWrapper.innerHTML = `
-      <div class="empty-state">
-        <p>未识别到有效 CSV 数据。</p>
-        <p>请检查逗号、换行或引号格式。</p>
-      </div>
-    `;
-    metaText.textContent = "转换失败";
-    copyBtn.disabled = true;
-    return;
-  }
-
-  currentRows = normalizeRows(parsedRows);
-  tableWrapper.classList.remove("empty");
-  tableWrapper.innerHTML = buildTable(currentRows);
-  metaText.textContent = `共 ${currentRows.length} 行，${currentRows[0].length} 列`;
-  copyBtn.disabled = false;
+function fillSample() {
+  csvInput.value = `姓名,部门,城市,备注
+张三,销售,上海,"季度目标完成 120%"
+李四,研发,深圳,"负责接口开发
+和联调"
+王五,财务,杭州,"""重点项目"" 跟进中"`;
+  renderTable();
 }
 
 convertBtn.addEventListener("click", renderTable);
@@ -188,25 +194,18 @@ copyBtn.addEventListener("click", async () => {
   try {
     await copyTable();
     copyBtn.textContent = "已复制";
-    setTimeout(() => {
-      copyBtn.textContent = "复制整表";
-    }, 1600);
   } catch (error) {
-    copyBtn.textContent = "复制失败";
-    setTimeout(() => {
-      copyBtn.textContent = "复制整表";
-    }, 1600);
     console.error(error);
+    copyBtn.textContent = "复制失败";
   }
+
+  window.setTimeout(() => {
+    copyBtn.textContent = "复制整表";
+  }, 1600);
 });
 
 sampleBtn.addEventListener("click", () => {
-  csvInput.value = `姓名,部门,城市,备注
-张三,销售,上海,"季度目标完成 120%"
-李四,研发,深圳,"负责接口开发
-和联调"
-王五,财务,杭州,"""重点项目"" 跟进中"`;
-  renderTable();
+  fillSample();
 });
 
 csvInput.addEventListener("keydown", (event) => {
@@ -214,3 +213,68 @@ csvInput.addEventListener("keydown", (event) => {
     renderTable();
   }
 });
+
+if (new URLSearchParams(window.location.search).get("sample") === "1") {
+  fillSample();
+}
+
+if (splitter && workspace) {
+  let dragging = false;
+  let dragMode = "width";
+
+  const storedWidth = window.localStorage.getItem(INPUT_PANEL_WIDTH_KEY);
+  const storedHeight = window.localStorage.getItem(INPUT_PANEL_HEIGHT_KEY);
+  if (storedWidth) {
+    workspace.style.setProperty("--input-panel-width", storedWidth);
+  }
+  if (storedHeight) {
+    workspace.style.setProperty("--input-panel-height", storedHeight);
+  }
+
+  function isStackedLayout() {
+    return window.getComputedStyle(workspace).flexDirection.startsWith("column");
+  }
+
+  splitter.addEventListener("pointerdown", (event) => {
+    dragging = true;
+    dragMode = isStackedLayout() ? "height" : "width";
+    splitter.setPointerCapture(event.pointerId);
+    event.preventDefault();
+  });
+
+  splitter.addEventListener("pointermove", (event) => {
+    if (!dragging) {
+      return;
+    }
+
+    const rect = workspace.getBoundingClientRect();
+    if (dragMode === "height") {
+      const minTop = 140;
+      const maxTop = Math.max(minTop, rect.height - splitter.offsetHeight - 140);
+      const nextHeight = Math.min(maxTop, Math.max(minTop, event.clientY - rect.top));
+      const nextHeightPercent = `${Math.round((nextHeight / rect.height) * 1000) / 10}%`;
+      workspace.style.setProperty("--input-panel-height", nextHeightPercent);
+      window.localStorage.setItem(INPUT_PANEL_HEIGHT_KEY, nextHeightPercent);
+      return;
+    }
+
+    const minLeft = 220;
+    const maxLeft = Math.max(minLeft, rect.width - splitter.offsetWidth - 260);
+    const nextWidth = Math.min(maxLeft, Math.max(minLeft, event.clientX - rect.left));
+    const nextWidthValue = `${nextWidth}px`;
+    workspace.style.setProperty("--input-panel-width", nextWidthValue);
+    window.localStorage.setItem(INPUT_PANEL_WIDTH_KEY, nextWidthValue);
+  });
+
+  function stopDragging(event) {
+    dragging = false;
+    try {
+      splitter.releasePointerCapture(event.pointerId);
+    } catch (error) {
+      void error;
+    }
+  }
+
+  splitter.addEventListener("pointerup", stopDragging);
+  splitter.addEventListener("pointercancel", stopDragging);
+}
