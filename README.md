@@ -24,7 +24,7 @@
 4. 选择本项目目录，例如：
 
    ```text
-   E:\Codex-E\CsvToExcel\chrome-extension
+   E:\CsvToExcel\chrome-extension
    ```
 
 5. 加载成功后，浏览器工具栏会出现 `CSV 转 Excel 预览` 扩展。
@@ -102,7 +102,7 @@ node -e "JSON.parse(require('fs').readFileSync('manifest.json','utf8')); console
 
 ## 更新记录
 
-### v1.1.0
+### v2.0
 
 - 改为 Chrome 原生 Side Panel 侧边栏模式。
 - 移除旧版页面浮窗和二次确认弹窗。
