@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV 转 Excel 预览</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="launcher">
+    <p class="eyebrow">CSV TO EXCEL PREVIEW</p>
+    <h1>CSV 转 Excel 工具</h1>
+    <p class="hero-copy">在当前网页里打开白色浮窗。同一标签页切换页面后会默认继续显示。</p>
+    <div class="actions">
+      <button id="openFloatingBtn" class="btn btn-primary">打开浮窗</button>
+      <button id="closeFloatingBtn" class="btn btn-secondary">关闭浮窗</button>
+    </div>
+    <p class="tip">浮窗可拖动、可缩放，不会跳转新页面。</p>
+    <p id="statusText" class="status" hidden></p>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
